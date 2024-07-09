@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .quiz-container {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        #result {
+            display: none;
+        }
+        button {
+            margin: 10px;
+            padding: 5px 10px;
+        }
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        #countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to my computer quiz!</h1>
+    <div id="start">
+        <p>Do you want to play?</p>
+        <button onclick="startQuiz()">Yes</button>
+        <button onclick="endGame()">No</button>
+    </div>
+
+    <div class="quiz-container" id="quiz">
+        <p id="question"></p>
+        <input type="text" id="answer">
+        <button onclick="checkAnswer()">Submit</button>
+        <p id="hint"></p>
+        <p id="timer">Time Left: <span id="countdown"></span></p>
+    </div>
+
+    <div class="quiz-container" id="result">
+        <p id="score"></p>
+        <p id="percentage"></p>
+        <button onclick="location.reload()">Play Again</button>
+        <div id="leaderboard">
+            <h2>Leaderboard</h2>
+            <ol id="leaderboardList"></ol>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+    { question: "What does CPU stand for?", answer: "central processing unit", hint: "It's the brain of the computer." },
+    { question: "What does GPU stand for?", answer: "graphics processing unit", hint: "It's specialized for rendering images and videos." },
+    { question: "What does RAM stand for?", answer: "random access memory", hint: "It provides high-speed data access." },
+    { question: "What does PSU stand for?", answer: "power supply unit", hint: "It converts AC power from the wall into usable DC power for the computer." },
+    { question: "What is a motherboard?", answer: "main circuit board", hint: "It holds and allows communication between all the crucial electronic components of a computer." },
+    { question: "What is an IP address?", answer: "internet protocol address", hint: "It uniquely identifies a device on a network using the IP protocol." },
+    { question: "What is phishing?", answer: "fraudulent attempt to obtain sensitive information", hint: "It often occurs through deceptive emails or websites." },
+    { question: "What is malware?", answer: "malicious software", hint: "It includes viruses, worms, Trojans, etc., designed to harm computers or steal information." },
+    { question: "What is encryption?", answer: "process of encoding data", hint: "It converts readable data into unreadable data to prevent unauthorized access." },
+    { question: "What is a firewall?", answer: "network security device", hint: "It monitors and controls incoming and outgoing network traffic based on predetermined security rules." },
+    { question: "What is a botnet?", answer: "network of private computers", hint: "It's a group of computers controlled by malicious software without the users' knowledge." },
+    { question: "What is data?", answer: "information", hint: "It describes other data, such as how, when, and by whom a piece of data was created." },
+    { question: "What is a proxy server?", answer: "intermediary server", hint: "It acts as an intermediary between a client and a server, forwarding requests." },
+    { question: "What is cloud computing?", answer: "delivery of computing services over the internet", hint: "It includes servers, storage, databases, networking, software, analytics, and intelligence." },
+    { question: "What is a DDoS attack?", answer: "distributed denial of service attack", hint: "It overwhelms a system with traffic to disrupt normal traffic." },
+    { question: "What is a VPN?", answer: "virtual private network", hint: "It extends a private network across a public network, enabling users to send and receive data across shared or public networks as if their computing devices were directly connected to the private network." },
+    { question: "What is social engineering?", answer: "psychological manipulation of people", hint: "It tricks people into divulging confidential information or taking action." },
+    { question: "What is a cookie (internet)?", answer: "small piece of data sent from a website", hint: "It is stored on the user's computer by the user's web browser while the user is browsing." },
+    { question: "What is two-factor authentication?", answer: "method of confirming users' identities", hint: "It requires users to provide two different authentication factors to verify themselves." },
+    { question: "What is a server?", answer: "computer or system that provides resources", hint: "It serves data, services, or applications to multiple users or other systems." },
+    { question: "What is a BIOS?", answer: "basic input/output system", hint: "It initializes and tests hardware components during the computer's startup process." },
+    { question: "What is HTTP?", answer: "hypertext transfer protocol", hint: "It is the foundation of data communication for the World Wide Web." },
+    { question: "What is HTML?", answer: "hypertext markup language", hint: "It is the standard markup language for creating web pages and web applications." },
+    { question: "What is CSS?", answer: "cascading style sheets", hint: "It describes how HTML elements are to be displayed on screen, paper, or in other media." },
+    { question: "What is JavaScript?", answer: "programming language", hint: "It allows you to implement complex features on web pages." },
+    { question: "What is SQL?", answer: "structured query language", hint: "It is used to communicate with a database." },
+    { question: "What is a URL?", answer: "uniform resource locator", hint: "It is a reference to a web resource that specifies its location on a computer network." },
+    { question: "What is a cache?", answer: "hardware or software component", hint: "It stores data so future requests for that data can be served faster." },
+    { question: "What is a modem?", answer: "modulator-demodulator", hint: "It converts digital data from a computer into analog data for transmission over analog networks." },
+    { question: "What is a router?", answer: "network device", hint: "It forwards data packets between computer networks." },
+    { question: "What is HTTP/2?", answer: "protocol", hint: "It is a major revision of the HTTP network protocol used by the World Wide Web." },
+    { question: "What is a LAN?", answer: "local area network", hint: "It connects computers within a limited area such as a residence, school, or office building." },
+    { question: "What is a WAN?", answer: "wide area network", hint: "It spans a large geographical area, typically across cities, countries, or continents." },
+    { question: "What is UX design?", answer: "user experience design", hint: "It encompasses all aspects of the end-user's interaction with a company, its services, and its products." },
+    { question: "What is UI design?", answer: "user interface design", hint: "It focuses on the look and feel, the presentation, and the interactivity of a product." },
+    { question: "What is agile software development?", answer: "approach to software development", hint: "It promotes adaptive planning, evolutionary development, early delivery, continuous improvement, and encourages rapid and flexible response to change." },
+    { question: "What is a byte?", answer: "unit of digital information", hint: "It is a basic unit of information storage in computing." },
+    { question: "What is a megabyte?", answer: "unit of digital information", hint: "It is equal to 1,024 kilobytes or 1,048,576 bytes." },
+    { question: "What is a gigabyte?", answer: "unit of digital information", hint: "It is equal to 1,024 megabytes or approximately 1 billion bytes." },
+    { question: "What is a terabyte?", answer: "unit of digital information", hint: "It is equal to 1,024 gigabytes or approximately 1 trillion bytes." },
+    { question: "What is a petabyte?", answer: "unit of digital information", hint: "It is equal to 1,024 terabytes or approximately 1 quadrillion bytes." },
+    { question: "What is a bitmap?", answer: "raster graphics image file format", hint: "It stores digital images using a pixel grid." },
+    { question: "What is a vector graphic?", answer: "image format", hint: "It uses geometric primitives such as points, lines, curves, and shapes to represent images." },
+    { question: "What is a DNS?", answer: "domain name system", hint: "It translates domain names to IP addresses." },
+    { question: "What is OAuth?", answer: "open authorization framework", hint: "It allows third-party services to exchange your information without sharing your full credentials." },
+    { question: "What is SSL?", answer: "secure sockets layer", hint: "It ensures that data passed between the web server and browsers remain private and integral." },
+    { question: "What is a data center?", answer: "facility used to house computer systems", hint: "It stores, manages, and disseminates data and information." },
+    { question: "What is a CDN?", answer: "content delivery network", hint: "It distributes service spatially relative to end-users to provide high availability and high performance." },
+    { question: "What is a GUI?", answer: "graphical user interface", hint: "It allows users to interact with electronic devices using images rather than text commands." },
+    { question: "What is a CLI?", answer: "command-line interface", hint: "It allows users to issue commands to a program by typing commands into a text interface." },
+    { question: "What is bytecode?", answer: "intermediate code", hint: "It is the compiled code for the Java Virtual Machine." },
+    { question: "What is an API?", answer: "application programming interface", hint: "It defines interactions between multiple software applications." },
+    { question: "What is a bug in software development?", answer: "defect or error", hint: "It prevents the program from performing as expected." },
+    { question: "What is version control?", answer: "management of changes", hint: "It records changes to files over time so that you can recall specific versions later." },
+    { question: "What is a syntax error?", answer: "error in the syntax", hint: "It occurs when a program violates the rules of the programming language." },
+    { question: "What is a runtime error?", answer: "error that occurs while the program is running", hint: "It causes the program to terminate abnormally." },
+    { question: "What is a logic error?", answer: "error in the program's logic", hint: "It produces incorrect results due to faulty reasoning in the code." },
+    { question: "What is a compiler?", answer: "translator", hint: "It translates high-level programming languages into machine code." },
+    { question: "What is a debugger?", answer: "tool for locating and fixing bugs", hint: "It allows programmers to identify and resolve errors in their programs." },
+    { question: "What is object-oriented programming?", answer: "paradigm based on objects", hint: "It organizes software design around data, or objects, rather than functions and logic." },
+    { question: "What is functional programming?", answer: "paradigm based on functions", hint: "It treats computation as the evaluation of mathematical functions and avoids changing state and mutable data." },
+];
+
+        const numQuestions = 10; // Number of questions to be asked
+    let currentQuestion = 0;
+    let score = 0;
+    const questionKeys = questions.map(q => q.question);
+    const countdownDuration = 30;
+    let countdown;
+
+    function startQuiz() {
+        document.getElementById('start').style.display = 'none';
+        document.getElementById('quiz').style.display = 'block';
+        askQuestion();
+        startTimer();
+    }
+
+    function startTimer() {
+        let timeLeft = countdownDuration;
+        updateTimerDisplay(timeLeft);
+
+        countdown = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay(timeLeft);
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay(timeLeft) {
+        const timerDisplay = document.getElementById('countdown');
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 10) {
+            timerDisplay.style.color = 'red'; // Change color when time is running out
+        }
+    }
+
+    function askQuestion() {
+        if (currentQuestion < numQuestions) {
+            const current = questions[currentQuestion];
+            document.getElementById('question').textContent = current.question;
+            document.getElementById('hint').textContent = `Hint: ${current.hint}`;
+        } else {
+            showResult();
+        }
+    }
+
+    function checkAnswer() {
+        const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+        const correctAnswer = questions[currentQuestion].answer;
+        
+        if (userAnswer === correctAnswer) {
+            document.getElementById('question').classList.add('correct');
+            setTimeout(() => {
+                document.getElementById('question').classList.remove('correct');
+            }, 1000);
+            score++;
+        } else {
+            document.getElementById('question').classList.add('incorrect');
+            setTimeout(() => {
+                document.getElementById('question').classList.remove('incorrect');
+            }, 1000);
+        }
+
+        clearInterval(countdown); // Clear the timer after each question
+        currentQuestion++;
+        if (currentQuestion < numQuestions) {
+            document.getElementById('answer').value = '';
+            askQuestion();
+            startTimer(); // Start timer for the next question
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('score').textContent = `You got ${score} questions correct!`;
+        const percentage = (score / numQuestions) * 100;
+        document.getElementById('percentage').textContent = `You got ${percentage.toFixed(2)}%`;
+
+        // Display leaderboard (dummy data for demonstration)
+        displayLeaderboard();
+    }
+
+    function displayLeaderboard() {
+        const leaderboardList = document.getElementById('leaderboardList');
+        const leaderboardData = [
+            { name: "Player 1", score: 40 },
+            { name: "Player 2", score: 35 },
+            { name: "Player 3", score: 30 },
+            { name: "Player 4", score: 25 },
+            { name: "Player 5", score: 20 }
+        ];
+
+        leaderboardData.forEach(entry => {
+            const li = document.createElement('li');
+            li.textContent = `${entry.name}: ${entry.score}`;
+            leaderboardList.appendChild(li);
+        });
+    }
+
+    function endGame() {
+        clearInterval(countdown);
+        alert('Time is up! Maybe next time! Goodbye!');
+        showResult();
+    }
+</script>
